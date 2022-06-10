@@ -7,6 +7,11 @@ const routes = [
     path: "/1",
     component: () => import("@/pages/BodySystem.vue"),
   },
+  {
+    name: "tree",
+    path: "/2",
+    component: () => import("@/pages/Tree.vue"),
+  },
 ];
 
 export const router = createRouter({
