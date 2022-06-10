@@ -1,6 +1,6 @@
 import { defineComponent } from "vue";
 import { LineSegments } from "three";
-import Object3D from "troisjs/src/core/Object3D";
+import { Object3D } from "troisjs";
 import { MeshInjectionKey } from "troisjs/src/meshes/Mesh";
 
 // not really a mesh, but allow us to easily get geometry/material support
