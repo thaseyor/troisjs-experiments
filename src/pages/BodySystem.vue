@@ -18,14 +18,6 @@
           />
           <PhongMaterial :props="{ emissive: '#FDB813' }" />
         </InstancedMesh>
-        <!-- <Plane
-          :width="25"
-          :height="25"
-          :rotation="{ z: Math.PI / 2, x: -Math.PI / 2 }"
-          :position="{ y: -6 }"
-        >
-          <ToonMaterial :props="{ side: 2 }" />
-        </Plane> -->
       </CannonWorld>
       <EffectComposer>
         <RenderPass />
@@ -42,11 +34,9 @@ import { Color, MathUtils, Object3D } from "three";
 
 import {
   InstancedMesh,
-  // Plane,
   SphereGeometry,
   Camera,
   PhongMaterial,
-  // ToonMaterial,
   AmbientLight,
   Renderer,
   Scene,

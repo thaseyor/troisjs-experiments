@@ -1,6 +1,9 @@
 <template>
   <div class="menu flex flex-col">
-    <div class="collapse flex space-between noselect" @click="show = !show">
+    <div
+      class="collapse pointer flex space-between noselect"
+      @click="show = !show"
+    >
       Menu
       <div class="arrow" :class="{ rotate: show }">></div>
     </div>
@@ -24,12 +27,13 @@ const show = ref(false);
   background-color: white;
   border-radius: 8px;
 }
+
 .collapse {
   min-width: 200px;
   height: 20px;
   padding: 8px;
-  cursor: pointer;
 }
+
 .rotate {
   transform: rotate(90deg);
 }

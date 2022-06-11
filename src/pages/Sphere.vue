@@ -4,6 +4,13 @@
       <span>speed</span>
       <input type="range" min="0" max="100" v-model="params.speed" />
     </div>
+    <div class="flex space-between">
+      <span>type</span>
+      <select v-model="params.type">
+        <option value="surface">Surface</option>
+        <option value="full">Full</option>
+      </select>
+    </div>
   </Menu>
   <Renderer
     antialias
@@ -39,18 +46,35 @@ const frame = ref(0);
 const points = ref([new Vector3(0, 0, 0)]);
 const params = ref({
   speed: 20,
+  type: "surface",
 });
+
+const generatePoint = {
+  surface: (prev) => {
+    const x = prev.x + rndFS(1);
+    const y = prev.y + rndFS(1);
+    const z = prev.z + rndFS(1);
+    return new Vector3(x, y, z);
+  },
+  full: () => {
+    const x = rndFS(1);
+    const y = rndFS(1);
+    const z = rndFS(1);
+    return new Vector3(x, y, z);
+  },
+};
 
 onMounted(() => {
   renderer.value.onBeforeRender(() => {
     frame.value = frame.value + 1;
+    const { type, speed } = params.value;
 
-    if (frame.value % Math.round(100 / params.value.speed) !== 0) return;
+    if (frame.value % Math.round(100 / speed) !== 0) return;
 
-    points.value = [
-      ...points.value,
-      new Vector3(rndFS(1), rndFS(1), rndFS(1)).setLength(1),
-    ];
+    const lastPoint = points.value[points.value.length - 1];
+    const nextPoint = generatePoint[type](lastPoint);
+
+    points.value = [...points.value, nextPoint.setLength(1)];
   });
 });
 </script>

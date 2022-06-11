@@ -11,6 +11,10 @@ a {
   color: black;
 }
 
+canvas {
+  display: block;
+}
+
 .flex {
   display: flex;
 }
@@ -36,6 +40,6 @@ a {
   align-items: center;
 }
 
-canvas {
-  display: block;
+.pointer {
+  cursor: pointer;
 }
