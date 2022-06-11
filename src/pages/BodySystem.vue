@@ -145,9 +145,3 @@ const onBeforeStep = ({ world }) => {
   });
 };
 </script>
-
-<style>
-canvas {
-  display: block;
-}
-</style>

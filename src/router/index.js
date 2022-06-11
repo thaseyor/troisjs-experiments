@@ -12,6 +12,11 @@ const routes = [
     path: "/2",
     component: () => import("@/pages/Tree.vue"),
   },
+  {
+    name: "sphere",
+    path: "/3",
+    component: () => import("@/pages/Sphere.vue"),
+  },
 ];
 
 export const router = createRouter({
