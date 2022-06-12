@@ -5,14 +5,28 @@
       <input type="range" min="1" max="10" v-model="BOX_SIZE" />
     </div>
     <div class="flex space-between">
-      <span>max angle</span>
+      <span>deviation angle</span>
       <input type="range" min="5" max="45" v-model="spreadAngle" step="5" />
     </div>
     <div class="flex space-between">
-      <span>equal branch size</span>
-      <input type="checkbox" v-model="equalSize" />
+      <span>initial branches</span>
+      <input type="range" min="2" max="7" v-model="init" />
     </div>
-    <button @click="start">restart</button>
+    <div class="flex space-between">
+      <span>branch length</span>
+      <input
+        type="range"
+        min="0.04"
+        max="0.15"
+        v-model="branchLength"
+        step="0.005"
+      />
+    </div>
+    <div class="flex space-between">
+      <span>accelerating growth</span>
+      <input type="checkbox" v-model="isAccelerating" />
+    </div>
+    <button @click="start" style="margin-top: 3px">restart</button>
   </Menu>
   <Renderer
     antialias
@@ -78,9 +92,10 @@ const iteration = ref(0);
 const init = ref(4);
 const BOX_SIZE = ref(4);
 const stopped = ref(true);
-const equalSize = ref(true);
+const isAccelerating = ref(false);
 const tree = ref([]);
 const spreadAngle = ref(20);
+const branchLength = ref(0.07);
 
 const AXIS_LIMIT = computed(() => {
   return Number(BOX_SIZE.value / 2);
@@ -105,7 +120,8 @@ const genCoordinates = (sign, axis = mainAxis) => {
 
 const genVector = (sign, axis = mainAxis) => {
   const temp = [0, 0, 0];
-  const length = equalSize.value ? 0.07 : 0.04;
+  const len = Number(branchLength.value);
+  const length = isAccelerating.value ? len / 2 : len;
   temp[axis] = -Math.sign(sign) * length;
   return new Vector3(...temp);
 };
@@ -124,7 +140,8 @@ const deviateVector = (vector, angle) => {
 
   const deviated = vector.clone().add(perpendicular);
 
-  if (equalSize.value) deviated.setLength(0.07 * random());
+  if (!isAccelerating.value)
+    deviated.setLength(Number(branchLength.value) * random());
 
   return deviated;
 };
@@ -140,7 +157,7 @@ const step = (pos, vector) => {
 
   newBranches.push(pos, newPos);
 
-  const isSafe = iteration.value <= init.value;
+  const isSafe = iteration.value <= Number(init.value);
   if (isSafe || random() > 0.5)
     steps.push(() => step(newPos, deviateVector(vector, radiansAngle.value)));
   if (isSafe || random() > 0.5)
