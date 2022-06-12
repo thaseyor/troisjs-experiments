@@ -25,4 +25,7 @@ import { RouterLink } from "vue-router";
   display: flex;
   flex-direction: column;
 }
+.list a {
+  color: white;
+}
 </style>
