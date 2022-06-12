@@ -75,10 +75,10 @@ const { random } = Math;
 const renderer = ref();
 const frame = ref(0);
 const iteration = ref(0);
-const init = ref(3);
+const init = ref(4);
 const BOX_SIZE = ref(4);
 const stopped = ref(true);
-const equalSize = ref(false);
+const equalSize = ref(true);
 const tree = ref([]);
 const spreadAngle = ref(20);
 
@@ -94,7 +94,7 @@ watch(BOX_SIZE, () => {
   tree.value = [];
 });
 
-const mainAxis = Math.floor(rnd(0, 3)); // 0:x 1:y 2:z
+let mainAxis; // 0:x 1:y 2:z
 
 const genCoordinates = (sign, axis = mainAxis) => {
   const size = AXIS_LIMIT.value;
@@ -112,6 +112,7 @@ const genVector = (sign, axis = mainAxis) => {
 
 let steps = [];
 let prevSteps = [];
+let newBranches = [];
 
 const deviateVector = (vector, angle) => {
   const length = Math.tan(angle) * vector.length() * random();
@@ -137,10 +138,9 @@ const step = (pos, vector) => {
   const coordinates = Object.values(newPos);
   if (coordinates.find((axis) => isBeyondLimit(axis))) return;
 
-  tree.value = [...tree.value, pos, newPos];
+  newBranches.push(pos, newPos);
 
   const isSafe = iteration.value <= init.value;
-
   if (isSafe || random() > 0.5)
     steps.push(() => step(newPos, deviateVector(vector, radiansAngle.value)));
   if (isSafe || random() > 0.5)
@@ -150,6 +150,8 @@ const step = (pos, vector) => {
 const start = () => {
   tree.value = [];
   prevSteps = [];
+  newBranches = [];
+  mainAxis = Math.floor(rnd(0, 3));
   steps = [
     () => step(genCoordinates(1), genVector(1)),
     () => step(genCoordinates(-1), genVector(-1)),
@@ -164,7 +166,11 @@ onMounted(() => {
     if (stopped.value) return;
 
     frame.value = frame.value + 1;
-    if (frame.value % 7 !== 0) return;
+    if (frame.value % 5 !== 0) return;
+
+    tree.value = [...tree.value, ...newBranches];
+    newBranches = [];
+
     iteration.value = iteration.value + 1;
 
     prevSteps = steps;
