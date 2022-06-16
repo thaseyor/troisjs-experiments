@@ -15,7 +15,7 @@
       />
 
       <FbxModel
-        src="src/assets/Skull.fbx"
+        :src="skull"
         @load="onLoad"
         :position="{ y: 30 }"
         :scale="{ x: 1.6, y: 1.6, z: 1.6 }"
@@ -26,6 +26,7 @@
 
 <script setup>
 import { Camera, DirectionalLight, FbxModel, Renderer, Scene } from "troisjs";
+import skull from "@/assets/Skull.fbx";
 
 const onLoad = (object) => {
   object.traverse((child) => {
