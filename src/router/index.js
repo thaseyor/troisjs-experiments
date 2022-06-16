@@ -17,6 +17,11 @@ const routes = [
     path: "/3",
     component: () => import("@/pages/Sphere.vue"),
   },
+  {
+    name: "skull",
+    path: "/4",
+    component: () => import("@/pages/Skull.vue"),
+  },
 ];
 
 export const router = createRouter({

@@ -3,6 +3,7 @@
     <router-link :to="{ name: 'body-system' }">N Body System</router-link>
     <router-link :to="{ name: 'tree' }">Tree</router-link>
     <router-link :to="{ name: 'sphere' }">Sphere</router-link>
+    <router-link :to="{ name: 'skull' }">Skull</router-link>
   </div>
 </template>
 

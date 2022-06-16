@@ -43,7 +43,7 @@ const { randFloatSpread: rndFS } = MathUtils;
 
 const renderer = ref();
 const frame = ref(0);
-const points = ref([new Vector3(0, 0, 0)]);
+const points = ref([new Vector3(0, 0, 1)]);
 const params = ref({
   speed: 20,
   type: "surface",
