@@ -78,10 +78,9 @@ import {
 } from "troisjs";
 
 import Menu from "@/components/Menu.vue";
-import LineSegments from "@/components/LineSegments";
-import EdgesGeometry from "@/components/EdgesGeometry";
-import LineBasicMaterial from "@/components/LineBasicMaterial";
-import CustomGeometry from "@/components/CustomGeometry";
+import { LineSegments } from "@/components/meshes";
+import { LineBasicMaterial } from "@/components/materials";
+import { EdgesGeometry, CustomGeometry } from "@/components/geometries";
 
 const { randFloat: rnd, randFloatSpread: rndFS } = MathUtils;
 const { random } = Math;

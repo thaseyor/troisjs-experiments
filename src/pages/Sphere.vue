@@ -35,9 +35,9 @@ import { Camera, Renderer, Scene } from "troisjs";
 import { Vector3, MathUtils } from "three";
 
 import Menu from "@/components/Menu.vue";
-import CustomGeometry from "@/components/CustomGeometry";
-import LineBasicMaterial from "@/components/LineBasicMaterial";
-import Line from "@/components/Line";
+import { CustomGeometry } from "@/components/geometries";
+import { LineBasicMaterial } from "@/components/materials";
+import { Line } from "@/components/meshes";
 
 const { randFloatSpread: rndFS } = MathUtils;
 
