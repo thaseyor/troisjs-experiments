@@ -1,24 +1,20 @@
 <template>
   <Renderer
-    ref="rendererC"
     antialias
     shadow
     :orbit-ctrl="{ enableDamping: true }"
     resize="window"
   >
-    <Camera ref="camera" :position="{ z: 12 }" />
+    <Camera :position="{ z: 14 }" />
     <Scene>
       <AmbientLight color="#ffffff" :intensity="0.35" />
       <CannonWorld :gravity="{ x: 0, y: 0, z: 0 }" @before-step="onBeforeStep">
         <InstancedMesh ref="imesh" :count="BODIES_N" @created="initIMesh">
-          <SphereGeometry
-            :radius="0.1"
-            :width-segments="16"
-            :height-segments="16"
-          />
+          <SphereGeometry :width-segments="20" :height-segments="20" />
           <PhongMaterial :props="{ emissive: '#FDB813' }" />
         </InstancedMesh>
       </CannonWorld>
+
       <EffectComposer>
         <RenderPass />
         <UnrealBloomPass :strength="0.6" />
@@ -31,7 +27,12 @@
 import { ref } from "vue";
 import CannonWorld from "troisjs/src/components/physics/CannonWorld.js";
 import { Color, MathUtils, Object3D } from "three";
-
+import {
+  scalarLength,
+  getAcceleration,
+  scaleFromMass,
+  massFromScale,
+} from "@/utils";
 import {
   InstancedMesh,
   SphereGeometry,
@@ -47,12 +48,11 @@ import {
 
 const { randFloat: rnd, randFloatSpread: rndFS } = MathUtils;
 
-const rendererC = ref();
 const imesh = ref();
-const camera = ref();
 
 const BODIES_N = ref(5);
-const G = 6.6743 * 10 ** -5;
+const G = 6.6743 * 10 ** -2;
+const ACCRETION_DISTANCE = 1.3;
 
 const colors = ["#FDB813", "#FF0000", "#0000FF", "#FFFFFF"];
 
@@ -66,11 +66,10 @@ function initIMesh(mesh) {
   const masses = new Array(BODIES_N.value);
   const velocities = new Array(BODIES_N.value);
   for (let i = 0; i < BODIES_N.value; i++) {
-    dummy.position.set(rndFS(10), rndFS(10), rndFS(10));
-    const scale = rnd(1, 4);
-
+    dummy.position.set(rndFS(8), rndFS(8), rndFS(8));
+    const scale = rnd(1, 4) * 0.1;
     scales[i] = scale;
-    masses[i] = scale * scale * 10;
+    masses[i] = massFromScale(scale);
     velocities[i] = { x: rndFS(0.75), y: rndFS(0.75), z: rndFS(0.75) };
 
     dummy.scale.set(scale, scale, scale);
@@ -86,52 +85,72 @@ function initIMesh(mesh) {
   mesh.userData.velocities = velocities;
   // mesh.userData.damping = 0.04;
 }
+const mergeBodies = (b1, b2, part = 1) => {
+  const data = imesh.value.userData;
+
+  if (data.masses[b2] < 0.0001) {
+    data.masses[b2] = 0;
+    data.scales[b2] = 0;
+    data.bodies[b2].shapes = [];
+    return;
+  }
+
+  const extractedMass = data.masses[b2] * part;
+  data.masses[b1] += extractedMass;
+  data.masses[b2] -= extractedMass;
+
+  data.scales[b1] = scaleFromMass(data.masses[b1]);
+  data.scales[b2] = scaleFromMass(data.masses[b2]);
+};
 
 const onBeforeStep = ({ world }) => {
-  // if (world.stepnumber % 10 !== 0) return;
-  const bodies = imesh.value.userData.bodies;
+  // if (world.stepnumber % 10 !== 0)
+  const data = imesh.value.userData;
+  const bodies = data.bodies;
+  if (world.stepnumber === 0) {
+    bodies.forEach((body) => (body.collisionResponse = false));
+  }
   bodies.forEach((body, curr) => {
+    if (!body.shapes[0]) return;
     const position = Object.values(body.position);
-    const velocity = Object.values(body.velocity);
     const accelerations = [];
-    for (let i = 0; i < BODIES_N.value; i++) {
+
+    for (let i = 0; i < bodies.length; i++) {
       if (i === curr) continue; // ignore itself
+      if (!bodies[i].shapes[0]) continue;
 
       const otherBody = bodies[i];
       const otherPosition = Object.values(otherBody.position);
-      const M = imesh.value.userData.masses[i];
+      const M = data.masses[i];
 
-      const distanceVectors = [
-        otherPosition[0] - position[0],
-        otherPosition[1] - position[1],
-        otherPosition[2] - position[2],
-      ];
+      const distanceVectors = position.map((p, i) => otherPosition[i] - p);
+      const R = scalarLength(distanceVectors);
 
-      // scalar distance
-      const R = Math.sqrt(
-        distanceVectors[0] ** 2 +
-          distanceVectors[1] ** 2 +
-          distanceVectors[2] ** 2
-      );
+      // check if body falls into the other body
+      const bodyRadius = body.shapes[0].radius;
+      if (R < bodyRadius * ACCRETION_DISTANCE) {
+        const part =
+          1 - (R - bodyRadius) / (ACCRETION_DISTANCE * bodyRadius - bodyRadius);
+        const isBigger = body.mass > otherBody.mass;
+        const biggerIndex = isBigger ? curr : i;
+        const smallerIndex = isBigger ? i : curr;
+        mergeBodies(biggerIndex, smallerIndex, part);
+        return;
+      }
 
-      const generalAcceleration = (G * M) / R ** 2;
-      const acceleration = distanceVectors.map(
-        (vector) => generalAcceleration * (vector / R)
-      );
+      const a = getAcceleration(G, M, R);
+      const acceleration = distanceVectors.map((vector) => a * (vector / R));
+
       accelerations.push(acceleration);
     }
-    // if (world.stepnumber % 60 === 0 && curr === 0) console.log(velocity);
 
     const resultantAcceleration = accelerations.reduce(
       (acc, curr) => acc.map((a, i) => a + curr[i]),
       [0, 0, 0]
     );
 
-    body.velocity.set(
-      velocity[0] + resultantAcceleration[0],
-      velocity[1] + resultantAcceleration[1],
-      velocity[2] + resultantAcceleration[2]
-    );
+    const velocity = Object.values(body.velocity);
+    body.velocity.set(...velocity.map((v, i) => v + resultantAcceleration[i]));
   });
 };
 </script>

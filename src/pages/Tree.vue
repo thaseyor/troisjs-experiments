@@ -134,7 +134,7 @@ const deviateVector = (vector, angle) => {
 
   const perpendicular = vector
     .clone()
-    .cross(new Vector3(rndFS(1), rndFS(1), rndFS(1)))
+    .cross(new Vector3().randomDirection())
     .setLength(length);
 
   const deviated = vector.clone().add(perpendicular);
