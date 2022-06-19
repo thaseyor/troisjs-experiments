@@ -1,5 +1,5 @@
-import { geometryComponent } from "troisjs/src/geometries/Geometry";
 import { BoxGeometry, EdgesGeometry } from "three";
+import { geometryComponent } from "@/helpers";
 
 export const props = {
   size: Number,

@@ -1,13 +1,11 @@
-import { BufferGeometry } from "three";
-import { geometryComponent } from "troisjs/src/geometries/Geometry";
+import { BufferGeometry, Vector3 } from "three";
+import { geometryComponent } from "@/helpers";
 
 export const props = {
-  points: Array,
+  points: { type: Array, default: () => [new Vector3(0, 0, 0)] },
 };
 
 export function createGeometry(comp) {
-  if (!comp.points) throw Error("No points provided");
-
   const geometry = new BufferGeometry().setFromPoints(comp.points);
 
   return geometry;
