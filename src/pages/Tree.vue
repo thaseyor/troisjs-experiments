@@ -37,23 +37,8 @@
   >
     <Camera :position="{ z: 6, x: 3, y: 1 }" />
     <Scene>
-      <Points>
-        <BoxGeometry
-          :widthSegments="3"
-          :heightSegments="3"
-          :depthSegments="3"
-          :width="Number(BOX_SIZE)"
-          :height="Number(BOX_SIZE)"
-          :depth="Number(BOX_SIZE)"
-        />
-        <PointsMaterial :props="{ size: 0.02 }" />
-      </Points>
       <LineSegments>
-        <EdgesGeometry
-          :width="Number(BOX_SIZE)"
-          :height="Number(BOX_SIZE)"
-          :depth="Number(BOX_SIZE)"
-        ></EdgesGeometry>
+        <EdgesGeometry :size="Number(BOX_SIZE)"></EdgesGeometry>
         <LineBasicMaterial color="#00ffff"></LineBasicMaterial>
       </LineSegments>
       <LineSegments>
@@ -68,14 +53,7 @@
 import { ref, onMounted, watch, computed } from "vue";
 import { Vector3, MathUtils } from "three";
 
-import {
-  Camera,
-  Renderer,
-  Scene,
-  Points,
-  BoxGeometry,
-  PointsMaterial,
-} from "troisjs";
+import { Camera, Renderer, Scene } from "troisjs";
 
 import Menu from "@/components/Menu.vue";
 import { LineSegments } from "@/components/meshes";

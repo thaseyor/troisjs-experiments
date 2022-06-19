@@ -11,6 +11,10 @@
         <option value="full">Full</option>
       </select>
     </div>
+    <div class="flex space-between">
+      <span>color</span>
+      <input type="color" v-model="mainColor" />
+    </div>
   </Menu>
   <Renderer
     antialias
@@ -22,8 +26,8 @@
     <Camera ref="camera" :position="{ z: 10 }" />
     <Scene>
       <Line>
-        <CustomGeometry :points="points" />
-        <LineBasicMaterial color="#00ffff" />
+        <CustomGeometry :points="points" :colors="colors" />
+        <LineBasicMaterial :color="mainColor" :props="{ vertexColors: true }" />
       </Line>
     </Scene>
   </Renderer>
@@ -40,12 +44,15 @@ import { LineBasicMaterial } from "@/components/materials";
 import { Line } from "@/components/meshes";
 
 const { randFloatSpread: rndFS } = MathUtils;
+const { random } = Math;
 
 const renderer = ref();
 const frame = ref(0);
 const points = ref([new Vector3(0, 0, 1)]);
+const mainColor = ref("#ffffff");
+const colors = ref([]);
 const params = ref({
-  speed: 20,
+  speed: 30,
   type: "surface",
 });
 
@@ -75,6 +82,7 @@ onMounted(() => {
     const nextPoint = generatePoint[type](lastPoint);
 
     points.value = [...points.value, nextPoint.setLength(1)];
+    colors.value = [...colors.value, random(), random(), random(), 1];
   });
 });
 </script>
