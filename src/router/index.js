@@ -22,6 +22,11 @@ const routes = [
     path: "/4",
     component: () => import("@/pages/Skull.vue"),
   },
+  {
+    name: "river",
+    path: "/5",
+    component: () => import("@/pages/River.vue"),
+  },
 ];
 
 export const router = createRouter({

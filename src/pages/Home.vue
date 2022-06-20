@@ -4,6 +4,7 @@
     <router-link :to="{ name: 'tree' }">Tree</router-link>
     <router-link :to="{ name: 'sphere' }">Sphere</router-link>
     <router-link :to="{ name: 'skull' }">Skull</router-link>
+    <router-link :to="{ name: 'river' }">For the River</router-link>
   </div>
 </template>
 
