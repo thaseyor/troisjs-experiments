@@ -68,7 +68,7 @@ const FLOW_POWER = ref(0.01);
 const FLOW_TENUITY = ref(5);
 
 const SCALE = 0.5;
-const AMOUNT = 2000;
+const AMOUNT = 1500;
 const LENGTH = 0.03;
 
 let prevPoints: Vector4[] = [];
