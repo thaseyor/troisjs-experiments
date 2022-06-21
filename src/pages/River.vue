@@ -4,6 +4,20 @@
       <span>box size</span>
       <input type="range" min="1" max="10" v-model="BOX_SIZE" />
     </div>
+    <div class="flex space-between">
+      <span>flow power</span>
+      <input
+        type="range"
+        min="0.002"
+        max="0.02"
+        step="0.002"
+        v-model="FLOW_POWER"
+      />
+    </div>
+    <div class="flex space-between">
+      <span>flow tenuity</span>
+      <input type="range" min="2" max="8" v-model="FLOW_TENUITY" />
+    </div>
   </Menu>
   <Renderer
     antialias
@@ -19,19 +33,22 @@
       </LineSegments>
       <LineSegments>
         <CustomGeometry :points="points" :colors="colors"></CustomGeometry>
+        <LineBasicMaterial
+          :props="{ vertexColors: true, transparent: true }"
+        ></LineBasicMaterial>
       </LineSegments>
     </Scene>
   </Renderer>
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
-
+import { ref, onMounted, watch, computed } from "vue";
 import { Camera, Renderer, Scene } from "troisjs";
 import { Vector4, MathUtils } from "three";
 
 import Menu from "@/components/Menu.vue";
 import { LineSegments } from "@/components/meshes";
+import { LineBasicMaterial } from "@/components/materials";
 import { EdgesGeometry, CustomGeometry } from "@/components/geometries";
 
 import { Perlin } from "@/utils/perlin";
@@ -43,17 +60,23 @@ const perlin = new Perlin(random());
 const frame = ref(0);
 const iteration = ref(0);
 const renderer = ref();
+
 const BOX_SIZE = ref(2);
+const FLOW_POWER = ref(0.01);
+const FLOW_TENUITY = ref(5);
 
 const SCALE = 0.5;
-const AMOUNT = 1500;
+const AMOUNT = 2000;
 const LENGTH = 0.03;
 
 let prevPoints = [];
 let newPoints = [];
 
 const points = ref([]);
-const colors = ref([]);
+const colors = computed(() => {
+  const coef = Number(FLOW_POWER.value);
+  return points.value.flatMap(({ w }) => [1, 1, 1, min(w * coef, 1)]);
+});
 
 const start = () => {
   prevPoints = [];
@@ -94,7 +117,8 @@ const render = (t = 0) => {
     for (let i = 0; i < n; i++) {
       const randomOne = trunc(random() * len);
       const { x, y, z } = prevPoints[randomOne];
-      const getShift = () => (random() - 0.5) * LENGTH * 5;
+      const getShift = () =>
+        (random() - 0.5) * LENGTH * Number(FLOW_TENUITY.value);
       const point = new Vector4(
         max(min(x + getShift(), halfBox), -halfBox),
         max(min(y + getShift(), halfBox), -halfBox),
@@ -105,12 +129,10 @@ const render = (t = 0) => {
       prevPoints.push(point);
     }
   }
-  const newColors = [];
 
   newPoints = [...prevPoints];
   for (let i = 0; i < newPoints.length; i++) {
     const { x, y, z, w } = newPoints[i];
-    newColors.push(0, 0, 0, min(w * 0.1, 1));
     const rad = getForceOnPoint(x, y, z, t);
     const nx = x + cos(rad) * LENGTH;
     const ny = y + sin(rad) * LENGTH;
@@ -119,23 +141,20 @@ const render = (t = 0) => {
     newPoints[i] = new Vector4(nx, ny, nz, w + 1);
   }
 
-  points.value = [...new Array(AMOUNT * 2)].map((_, i) => {
+  const blankArray = new Array(AMOUNT * 2).fill(null);
+  points.value = blankArray.map((_, i) => {
     if (i % 2 === 0) return prevPoints[i / 2];
     return newPoints[(i - 1) / 2];
   });
 
-  prevPoints = [...newPoints];
-
-  colors.value = newColors;
+  prevPoints = newPoints;
 };
 
 onMounted(() => {
   start();
   renderer.value.onBeforeRender(() => {
     frame.value = frame.value + 1;
-
-    if (frame.value % 3 !== 0) return;
-
+    if (frame.value % 2 !== 0) return;
     iteration.value = iteration.value + 1;
 
     render(iteration.value);
