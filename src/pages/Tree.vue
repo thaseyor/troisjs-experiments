@@ -49,7 +49,7 @@
   </Renderer>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
 import { Vector3, MathUtils } from "three";
 
@@ -59,6 +59,8 @@ import Menu from "@/components/Menu.vue";
 import { LineSegments } from "@/components/meshes";
 import { LineBasicMaterial } from "@/components/materials";
 import { EdgesGeometry, CustomGeometry } from "@/components/geometries";
+
+import type { Ref } from "vue";
 
 const { randFloat: rnd, randFloatSpread: rndFS } = MathUtils;
 const { random } = Math;
@@ -70,7 +72,7 @@ const init = ref(4);
 const BOX_SIZE = ref(4);
 const stopped = ref(true);
 const isAccelerating = ref(false);
-const tree = ref([]);
+const tree: Ref<Vector3[]> = ref([]);
 const spreadAngle = ref(20);
 const branchLength = ref(0.07);
 
@@ -86,7 +88,7 @@ watch(BOX_SIZE, () => {
   tree.value = [];
 });
 
-let mainAxis; // 0:x 1:y 2:z
+let mainAxis: number; // 0:x 1:y 2:z
 
 const genCoordinates = (sign, axis = mainAxis) => {
   const size = AXIS_LIMIT.value;
@@ -103,11 +105,11 @@ const genVector = (sign, axis = mainAxis) => {
   return new Vector3(...temp);
 };
 
-let steps = [];
-let prevSteps = [];
-let newBranches = [];
+let steps: Function[] = [];
+let prevSteps: Function[] = [];
+let newBranches: Vector3[] = [];
 
-const deviateVector = (vector, angle) => {
+const deviateVector = (vector: Vector3, angle: number) => {
   const length = Math.tan(angle) * vector.length() * random();
 
   const perpendicular = vector
@@ -123,13 +125,13 @@ const deviateVector = (vector, angle) => {
   return deviated;
 };
 
-const isBeyondLimit = (axis) =>
+const isBeyondLimit = (axis: number) =>
   axis > AXIS_LIMIT.value || axis < -AXIS_LIMIT.value;
 
-const step = (pos, vector) => {
+const step = (pos: Vector3, vector: Vector3): void => {
   const newPos = pos.clone().add(vector);
 
-  const coordinates = Object.values(newPos);
+  const coordinates: number[] = Object.values(newPos);
   if (coordinates.find((axis) => isBeyondLimit(axis))) return;
 
   newBranches.push(pos, newPos);

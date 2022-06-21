@@ -1,13 +1,8 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
-const path = require("path");
+import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineConfig({
   assetsInclude: ["**/*.fbx"],
-  resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-    },
-  },
-  plugins: [vue()],
+  plugins: [tsconfigPaths(), vue()],
 });

@@ -33,7 +33,7 @@
   </Renderer>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from "vue";
 import { Camera, Renderer, Scene } from "troisjs";
 import { Vector3, MathUtils } from "three";
@@ -43,6 +43,8 @@ import { CustomGeometry } from "@/components/geometries";
 import { LineBasicMaterial } from "@/components/materials";
 import { Line } from "@/components/meshes";
 
+import type { Ref } from "vue";
+
 const { randFloatSpread: rndFS } = MathUtils;
 const { random } = Math;
 
@@ -50,7 +52,7 @@ const renderer = ref();
 const frame = ref(0);
 const points = ref([new Vector3(0, 0, 1)]);
 const mainColor = ref("#ffffff");
-const colors = ref([]);
+const colors: Ref<number[]> = ref([]);
 const params = ref({
   speed: 30,
   type: "surface",

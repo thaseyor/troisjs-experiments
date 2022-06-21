@@ -24,8 +24,9 @@
   </Renderer>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { Camera, DirectionalLight, FbxModel, Renderer, Scene } from "troisjs";
+// @ts-ignore
 import skull from "@/assets/Skull.fbx";
 
 const onLoad = (object) => {

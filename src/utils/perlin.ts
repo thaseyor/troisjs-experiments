@@ -19,15 +19,25 @@ const p = [
   61, 156, 180,
 ];
 
+type Vector = Vector2 | Vector3 | Vector4;
+type MapType = (
+  x: number,
+  in_min: number,
+  in_max: number,
+  out_min: number,
+  out_max: number
+) => number;
+
 /**
  * An implimentation of Perlin Noise by Ken Perlin.
  */
 export class Perlin {
-  /**
-   *
-   * @param {number} seed Seed Value for PRNG.
-   */
-  constructor(seed) {
+  _seed: number;
+  _offsetMatrix: Vector4[];
+  perm: number[];
+  gradP: Vector4[];
+
+  constructor(seed: number) {
     const _gradientVecs = [
       // 2D Vecs
       new Vector4(1, 1, 0, 0),
@@ -62,8 +72,8 @@ export class Perlin {
       new Vector4(0, -1, -1, -1),
     ];
 
-    var perm = new Array(512);
-    var gradP = new Array(512);
+    var perm: number[] = new Array(512);
+    var gradP: Vector4[] = new Array(512);
 
     if (!seed) seed = 1;
     seed *= 65536;
@@ -73,8 +83,8 @@ export class Perlin {
       seed |= seed << 8;
     }
 
-    for (var i = 0; i < 256; i++) {
-      var v;
+    for (let i = 0; i < 256; i++) {
+      let v: number;
       if (i & 1) {
         v = p[i] ^ (seed & 255);
       } else {
@@ -110,15 +120,15 @@ export class Perlin {
     this.gradP = gradP;
   }
 
-  _fade(t) {
+  _fade(t: number) {
     return t * t * t * (t * (t * 6 - 15) + 10);
   }
 
-  _lerp(a, b, t) {
+  _lerp(a: number, b: number, t: number) {
     return (1 - t) * a + t * b;
   }
 
-  _gradient(posInCell) {
+  _gradient(posInCell: Vector) {
     if (posInCell instanceof Vector4)
       return (
         posInCell.x +
@@ -133,32 +143,22 @@ export class Perlin {
 
   /**
    * Maps a number from one range to another.
-   * @param {number} x       Input Number
-   * @param {number} in_min  Current range minimum
-   * @param {number} in_max  Current range maximum
-   * @param {number} out_min New range minimum
-   * @param {number} out_max New range maximum
-   * @returns {number} Input Mapped to range [out_min, out_max]
    */
-  static map(x, in_min, in_max, out_min, out_max) {
+  static map: MapType = (x, in_min, in_max, out_min, out_max) => {
     return ((x - in_min) * (out_max - out_min)) / (in_max - in_min) + out_min;
-  }
+  };
 
   /**
    * Samples 2D Perlin Nosie at given coordinates.
-   * @param {Vector2 | Vector3 | Vector4} input Coordinates to sample at
-   * @returns {number} Value of Perlin Noise at that coordinate.
    */
-  get2(input) {
-    if (input.z !== undefined) input = new Vector2(input.x, input.y);
-
+  get2(input: Vector2): number {
     const cell = new Vector2(Math.floor(input.x), Math.floor(input.y));
     input.sub(cell);
 
     cell.x &= 255;
     cell.y &= 255;
 
-    const gradiantDot = [];
+    const gradiantDot: number[] = [];
     for (let i = 0; i < 4; i++) {
       const s4 = this._offsetMatrix[i * 4];
       const s = new Vector2(s4.x, s4.y);
@@ -185,10 +185,8 @@ export class Perlin {
 
   /**
    * Samples 3D Perlin Nosie at given coordinates.
-   * @param {Vector3} input Coordinates to sample at
-   * @returns {number} Value of Perlin Noise at that coordinate.
    */
-  get3(input) {
+  get3(input: Vector3): number {
     if (input.z === undefined)
       throw "Input to Perlin::get3() must be of type Vector3";
 
@@ -203,7 +201,7 @@ export class Perlin {
     cell.y &= 255;
     cell.z &= 255;
 
-    const gradiantDot = [];
+    const gradiantDot: number[] = [];
     for (let i = 0; i < 8; i++) {
       const s4 = this._offsetMatrix[i * 2];
       const s = new Vector3(s4.x, s4.y, s4.z);
@@ -239,10 +237,8 @@ export class Perlin {
 
   /**
    * Samples 4D Perlin Nosie at given coordinates.
-   * @param {Vector4} input Coordinates to sample at
-   * @returns {number} Value of Perlin Noise at that coordinate.
    */
-  get4(input) {
+  get4(input: Vector4): number {
     if (input.z === undefined || input.w === undefined)
       throw "Input to Perlin::get3() must be of type Vector4";
 
@@ -259,7 +255,7 @@ export class Perlin {
     cell.z &= 255;
     cell.w &= 255;
 
-    const gradiantDot = [];
+    const gradiantDot: number[] = [];
     for (let i = 0; i < 16; i++) {
       const s = this._offsetMatrix[i];
 

@@ -41,10 +41,12 @@
   </Renderer>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted, watch, computed } from "vue";
 import { Camera, Renderer, Scene } from "troisjs";
 import { Vector4, MathUtils } from "three";
+
+import type { Ref, ComputedRef } from "vue";
 
 import Menu from "@/components/Menu.vue";
 import { LineSegments } from "@/components/meshes";
@@ -69,11 +71,11 @@ const SCALE = 0.5;
 const AMOUNT = 2000;
 const LENGTH = 0.03;
 
-let prevPoints = [];
-let newPoints = [];
+let prevPoints: Vector4[] = [];
+let newPoints: Vector4[] = [];
 
-const points = ref([]);
-const colors = computed(() => {
+const points: Ref<Vector4[]> = ref([]);
+const colors: ComputedRef<number[]> = computed(() => {
   const coef = Number(FLOW_POWER.value);
   return points.value.flatMap(({ w }) => [1, 1, 1, min(w * coef, 1)]);
 });
@@ -93,12 +95,12 @@ watch(BOX_SIZE, () => {
   start();
 });
 
-const isBeyondLimit = (axis) => {
+const isBeyondLimit = (axis: number) => {
   const size = BOX_SIZE.value / 2;
   return axis > size || axis < -size;
 };
 
-const getForceOnPoint = (x, y, z, t) => {
+const getForceOnPoint = (x: number, y: number, z: number, t: number) => {
   const point = new Vector4(x / SCALE, y / SCALE, z / SCALE, t * 0.0005);
   return (perlin.get4(point) - 0.5) * 4 * PI;
 };
@@ -142,7 +144,7 @@ const render = (t = 0) => {
   }
 
   const blankArray = new Array(AMOUNT * 2).fill(null);
-  points.value = blankArray.map((_, i) => {
+  points.value = blankArray.map((_, i): Vector4 => {
     if (i % 2 === 0) return prevPoints[i / 2];
     return newPoints[(i - 1) / 2];
   });

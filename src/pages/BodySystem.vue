@@ -23,7 +23,7 @@
   </Renderer>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref } from "vue";
 import CannonWorld from "troisjs/src/components/physics/CannonWorld.js";
 import { Color, MathUtils, Object3D } from "three";
@@ -85,6 +85,7 @@ function initIMesh(mesh) {
   mesh.userData.velocities = velocities;
   // mesh.userData.damping = 0.04;
 }
+
 const mergeBodies = (b1, b2, part = 1) => {
   const data = imesh.value.userData;
 
@@ -112,15 +113,15 @@ const onBeforeStep = ({ world }) => {
   }
   bodies.forEach((body, curr) => {
     if (!body.shapes[0]) return;
-    const position = Object.values(body.position);
-    const accelerations = [];
+    const position: number[] = Object.values(body.position);
+    const accelerations: number[][] = [];
 
     for (let i = 0; i < bodies.length; i++) {
       if (i === curr) continue; // ignore itself
       if (!bodies[i].shapes[0]) continue;
 
       const otherBody = bodies[i];
-      const otherPosition = Object.values(otherBody.position);
+      const otherPosition: number[] = Object.values(otherBody.position);
       const M = data.masses[i];
 
       const distanceVectors = position.map((p, i) => otherPosition[i] - p);
@@ -149,7 +150,7 @@ const onBeforeStep = ({ world }) => {
       [0, 0, 0]
     );
 
-    const velocity = Object.values(body.velocity);
+    const velocity: number[] = Object.values(body.velocity);
     body.velocity.set(...velocity.map((v, i) => v + resultantAcceleration[i]));
   });
 };

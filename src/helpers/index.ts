@@ -5,14 +5,19 @@ import {
   Mesh,
 } from "troisjs";
 
-export function meshComponent(name, props, createMesh) {
+type CreateFunction = (comp: any) => any;
+
+export function meshComponent(name: string, props, createMesh: CreateFunction) {
   return defineComponent({
     name,
     extends: Mesh,
     props,
+    // setup() {
+    //   return { mesh<any>: null };
+    // },
     created() {
       this.createMesh();
-      this.initObject3D(this.mesh);
+      this.initObject3D(this.mesh as any);
     },
     methods: {
       createMesh() {
@@ -22,7 +27,11 @@ export function meshComponent(name, props, createMesh) {
   });
 }
 
-export function geometryComponent(name, props, createGeometry) {
+export function geometryComponent(
+  name: string,
+  props,
+  createGeometry: CreateFunction
+) {
   return defineComponent({
     name,
     extends: Geometry,
@@ -30,14 +39,18 @@ export function geometryComponent(name, props, createGeometry) {
     methods: {
       createGeometry() {
         this.geometry = createGeometry(this);
-        this.geometry.userData.component = this;
+        this.geometry!.userData.component = this;
         this.$emit("created", this.geometry);
       },
     },
   });
 }
 
-export function materialComponent(name, props, createMaterial) {
+export function materialComponent(
+  name: string,
+  props,
+  createMaterial: CreateFunction
+) {
   return defineComponent({
     name,
     extends: BaseMaterial,

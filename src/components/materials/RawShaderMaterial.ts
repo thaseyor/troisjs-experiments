@@ -16,7 +16,7 @@ const defaultFragmentShader = `
   }
 `;
 
-export function excludeProps(props, whiteList = []) {
+export function excludeProps(props, whiteList: string[] = []) {
   const values = {};
   Object.entries(props).forEach(([key, value]) => {
     if (!whiteList || !whiteList.includes(key)) {
@@ -30,12 +30,9 @@ export default materialComponent(
   "RawShaderMaterial",
   {
     props: {
-      type: Object,
-      default: () => ({
-        uniforms: {},
-        vertexShader: defaultVertexShader,
-        fragmentShader: defaultFragmentShader,
-      }),
+      uniforms: {},
+      vertexShader: defaultVertexShader,
+      fragmentShader: defaultFragmentShader,
     },
   },
   (opts) => new RawShaderMaterial(excludeProps(opts, ["color"]))

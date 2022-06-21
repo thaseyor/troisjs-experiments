@@ -1,7 +1,17 @@
 import { BoxGeometry, EdgesGeometry } from "three";
 import { geometryComponent } from "@/helpers";
 
-export const props = {
+type PropsType = {
+  size: number;
+  width: number;
+  height: number;
+  depth: number;
+  widthSegments: number;
+  heightSegments: number;
+  depthSegments: number;
+};
+
+const props = {
   size: Number,
   width: { type: Number, default: 1 },
   height: { type: Number, default: 1 },
@@ -11,8 +21,8 @@ export const props = {
   depthSegments: { type: Number, default: 1 },
 };
 
-export function createGeometry(comp) {
-  const geometry = new BoxGeometry(
+export function createGeometry(comp: PropsType): EdgesGeometry {
+  const geometry: BoxGeometry = new BoxGeometry(
     comp.size ? comp.size : comp.width,
     comp.size ? comp.size : comp.height,
     comp.size ? comp.size : comp.depth,
