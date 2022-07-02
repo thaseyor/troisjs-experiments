@@ -46,11 +46,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from "vue";
+import { ref, onMounted, watch, computed, shallowRef } from "vue";
 import { Camera, Renderer, Scene } from "troisjs";
 import { Vector4, MathUtils } from "three";
 
-import type { Ref, ComputedRef } from "vue";
+import type { ShallowRef, ComputedRef } from "vue";
 
 import Menu from "@/components/Menu.vue";
 import { LineSegments } from "@/components/meshes";
@@ -80,7 +80,7 @@ const LENGTH = 0.03;
 
 let prevPoints: Vector4[] = [];
 
-const points: Ref<Vector4[]> = ref([]);
+const points: ShallowRef<Vector4[]> = shallowRef([]);
 
 const colors: ComputedRef<number[]> = computed(() => {
   const coef = Number(FLOW_POWER.value);

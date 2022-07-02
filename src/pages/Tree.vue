@@ -6,7 +6,7 @@
     </div>
     <div class="flex space-between">
       <span>deviation angle</span>
-      <input type="range" min="5" max="45" v-model="spreadAngle" step="5" />
+      <input type="range" min="5" max="45" v-model="spreadAng" step="5" />
     </div>
     <div class="flex space-between">
       <span>initial branches</span>
@@ -50,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, watch, computed } from "vue";
+import { ref, onMounted, watch, computed, shallowRef } from "vue";
 import { Vector3, MathUtils } from "three";
 
 import { Camera, Renderer, Scene } from "troisjs";
@@ -60,7 +60,7 @@ import { LineSegments } from "@/components/meshes";
 import { LineBasicMaterial } from "@/components/materials";
 import { EdgesGeometry, CustomGeometry } from "@/components/geometries";
 
-import type { Ref } from "vue";
+import type { ShallowRef } from "vue";
 
 const { randFloat: rnd, randFloatSpread: rndFS } = MathUtils;
 const { random } = Math;
@@ -72,16 +72,13 @@ const init = ref(4);
 const BOX_SIZE = ref(4);
 const stopped = ref(true);
 const isAccelerating = ref(false);
-const tree: Ref<Vector3[]> = ref([]);
-const spreadAngle = ref(20);
+const spreadAng = ref(20);
 const branchLength = ref(0.07);
 
-const AXIS_LIMIT = computed(() => {
-  return Number(BOX_SIZE.value / 2);
-});
-const radiansAngle = computed(() => {
-  return (Number(spreadAngle.value) * Math.PI) / 180;
-});
+const tree: ShallowRef<Vector3[]> = shallowRef([]);
+
+const AXIS_LIMIT = computed(() => Number(BOX_SIZE.value / 2));
+const radiansAngle = computed(() => (Number(spreadAng.value) * Math.PI) / 180);
 
 watch(BOX_SIZE, () => {
   stopped.value = true;
@@ -162,7 +159,7 @@ onMounted(() => {
     if (stopped.value) return;
 
     frame.value = frame.value + 1;
-    if (frame.value % 5 !== 0) return;
+    if (frame.value % 3 !== 0) return;
 
     tree.value = [...tree.value, ...newBranches];
     newBranches = [];

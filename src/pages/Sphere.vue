@@ -34,7 +34,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, shallowRef } from "vue";
 import { Camera, Renderer, Scene } from "troisjs";
 import { Vector3, MathUtils } from "three";
 
@@ -43,20 +43,21 @@ import { CustomGeometry } from "@/components/geometries";
 import { LineBasicMaterial } from "@/components/materials";
 import { Line } from "@/components/meshes";
 
-import type { Ref } from "vue";
+import type { ShallowRef } from "vue";
 
 const { randFloatSpread: rndFS } = MathUtils;
 const { random } = Math;
 
 const renderer = ref();
 const frame = ref(0);
-const points = ref([new Vector3(0, 0, 1)]);
 const mainColor = ref("#ffffff");
-const colors: Ref<number[]> = ref([]);
 const params = ref({
   speed: 30,
   type: "surface",
 });
+
+const points = shallowRef([new Vector3(0, 0, 1)]);
+const colors: ShallowRef<number[]> = shallowRef([]);
 
 const generatePoint = {
   surface: (prev) => {

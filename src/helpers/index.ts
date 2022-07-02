@@ -12,9 +12,6 @@ export function meshComponent(name: string, props, createMesh: CreateFunction) {
     name,
     extends: Mesh,
     props,
-    // setup() {
-    //   return { mesh<any>: null };
-    // },
     created() {
       this.createMesh();
       this.initObject3D(this.mesh as any);
