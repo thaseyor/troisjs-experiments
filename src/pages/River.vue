@@ -18,6 +18,10 @@
       <span>flow tenuity</span>
       <input type="range" min="2" max="8" v-model="FLOW_TENUITY" />
     </div>
+    <div class="flex space-between">
+      <span>pseudo 3d</span>
+      <input type="checkbox" v-model="PSEUDO_3D" />
+    </div>
   </Menu>
   <Renderer
     antialias
@@ -57,7 +61,9 @@ import { Perlin } from "@/utils/perlin";
 
 const { randFloatSpread: rndFS } = MathUtils;
 const { random, PI, cos, sin, trunc, min, max } = Math;
+
 const perlin = new Perlin(random());
+const perlin2 = new Perlin(random());
 
 const frame = ref(0);
 const iteration = ref(0);
@@ -66,15 +72,16 @@ const renderer = ref();
 const BOX_SIZE = ref(2);
 const FLOW_POWER = ref(0.01);
 const FLOW_TENUITY = ref(5);
+const PSEUDO_3D = ref(true);
 
 const SCALE = 0.5;
 const AMOUNT = 1500;
 const LENGTH = 0.03;
 
 let prevPoints: Vector4[] = [];
-let newPoints: Vector4[] = [];
 
 const points: Ref<Vector4[]> = ref([]);
+
 const colors: ComputedRef<number[]> = computed(() => {
   const coef = Number(FLOW_POWER.value);
   return points.value.flatMap(({ w }) => [1, 1, 1, min(w * coef, 1)]);
@@ -82,7 +89,6 @@ const colors: ComputedRef<number[]> = computed(() => {
 
 const start = () => {
   prevPoints = [];
-  newPoints = [];
   iteration.value = 0;
   const getCord = () => rndFS(BOX_SIZE.value);
   for (let i = 0; i < AMOUNT; i++) {
@@ -100,9 +106,14 @@ const isBeyondLimit = (axis: number) => {
   return axis > size || axis < -size;
 };
 
-const getForceOnPoint = (x: number, y: number, z: number, t: number) => {
+const getThetaOnPoint = (x: number, y: number, z: number, t: number) => {
   const point = new Vector4(x / SCALE, y / SCALE, z / SCALE, t * 0.0005);
   return (perlin.get4(point) - 0.5) * 4 * PI;
+};
+
+const getPhiOnPoint = (x: number, y: number, z: number, t: number) => {
+  const point = new Vector4(x / SCALE, y / SCALE, z / SCALE, t * 0.001);
+  return (perlin2.get4(point) - 0.5) * 4 * PI;
 };
 
 const render = (t = 0) => {
@@ -132,19 +143,34 @@ const render = (t = 0) => {
     }
   }
 
-  newPoints = [...prevPoints];
-  for (let i = 0; i < newPoints.length; i++) {
-    const { x, y, z, w } = newPoints[i];
-    const rad = getForceOnPoint(x, y, z, t);
-    const nx = x + cos(rad) * LENGTH;
-    const ny = y + sin(rad) * LENGTH;
-    const nz = z + cos(rad) * LENGTH;
+  const isPseudo3D = PSEUDO_3D.value;
+  const newPoints: Vector4[] = prevPoints.map((p) => {
+    const { x, y, z, w } = p;
+    const theta = getThetaOnPoint(x, y, z, t);
 
-    newPoints[i] = new Vector4(nx, ny, nz, w + 1);
-  }
+    let dx = cos(theta) * LENGTH;
+    let dy = sin(theta) * LENGTH;
+    let dz = cos(theta) * LENGTH;
 
-  const blankArray = new Array(AMOUNT * 2).fill(null);
-  points.value = blankArray.map((_, i): Vector4 => {
+    if (!isPseudo3D) {
+      // spherical trigonometry
+      const phi = getPhiOnPoint(x, y, z, t);
+      const cosPheta = cos(phi);
+      const sinPheta = sin(phi);
+
+      dz = sinPheta * LENGTH;
+      dy *= cosPheta;
+      dx *= cosPheta;
+    }
+
+    const nx = x + dx;
+    const ny = y + dy;
+    const nz = z + dz;
+
+    return new Vector4(nx, ny, nz, w + 1);
+  });
+
+  points.value = Array.from({ length: AMOUNT * 2 }, (_, i): Vector4 => {
     if (i % 2 === 0) return prevPoints[i / 2];
     return newPoints[(i - 1) / 2];
   });
