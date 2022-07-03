@@ -71,12 +71,13 @@ const renderer = ref();
 
 const BOX_SIZE = ref(2);
 const FLOW_POWER = ref(0.01);
-const FLOW_TENUITY = ref(5);
+const FLOW_TENUITY = ref(6);
 const PSEUDO_3D = ref(true);
 
 const SCALE = 0.5;
-const AMOUNT = 1500;
-const LENGTH = 0.03;
+const AMOUNT = 5000;
+const LENGTH = 0.02;
+const SMOOTHNESS = 3;
 
 let prevPoints: Vector4[] = [];
 
@@ -175,7 +176,18 @@ const render = (t = 0) => {
     return newPoints[(i - 1) / 2];
   });
 
-  prevPoints = newPoints;
+  prevPoints = newPoints.map((p, i) => {
+    const { x, y, z, w } = p;
+    const prev = prevPoints[i];
+
+    const dx = (x - prev.x) / SMOOTHNESS;
+    const dy = (y - prev.y) / SMOOTHNESS;
+    const dz = (z - prev.z) / SMOOTHNESS;
+
+    const halfDist = new Vector4(x + dx, y + dy, z + dz, w);
+
+    return halfDist;
+  });
 };
 
 onMounted(() => {
