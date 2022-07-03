@@ -6,13 +6,7 @@
     </div>
     <div class="flex space-between">
       <span>flow power</span>
-      <input
-        type="range"
-        min="0.002"
-        max="0.02"
-        step="0.002"
-        v-model="FLOW_POWER"
-      />
+      <input type="range" min="1" max="10" v-model="FLOW_POWER" />
     </div>
     <div class="flex space-between">
       <span>flow tenuity</span>
@@ -70,21 +64,21 @@ const iteration = ref(0);
 const renderer = ref();
 
 const BOX_SIZE = ref(2);
-const FLOW_POWER = ref(0.01);
+const FLOW_POWER = ref(4);
 const FLOW_TENUITY = ref(6);
 const PSEUDO_3D = ref(true);
 
 const SCALE = 0.5;
 const AMOUNT = 5000;
 const LENGTH = 0.02;
-const SMOOTHNESS = 3;
+const SMOOTHNESS = 0.75;
 
 let prevPoints: Vector4[] = [];
 
 const points: ShallowRef<Vector4[]> = shallowRef([]);
 
 const colors: ComputedRef<number[]> = computed(() => {
-  const coef = Number(FLOW_POWER.value);
+  const coef = Number(FLOW_POWER.value) / 1000;
   return points.value.flatMap(({ w }) => [1, 1, 1, min(w * coef, 1)]);
 });
 
@@ -156,19 +150,19 @@ const render = (t = 0) => {
     if (!isPseudo3D) {
       // spherical trigonometry
       const phi = getPhiOnPoint(x, y, z, t);
-      const cosPheta = cos(phi);
-      const sinPheta = sin(phi);
+      const cosPhi = cos(phi);
+      const sinPhi = sin(phi);
 
-      dz = sinPheta * LENGTH;
-      dy *= cosPheta;
-      dx *= cosPheta;
+      dz = sinPhi * LENGTH;
+      dy *= cosPhi;
+      dx *= cosPhi;
     }
 
     const nx = x + dx;
     const ny = y + dy;
     const nz = z + dz;
 
-    return new Vector4(nx, ny, nz, w + 1);
+    return new Vector4(nx, ny, nz, w + 1 / SMOOTHNESS);
   });
 
   points.value = Array.from({ length: AMOUNT * 2 }, (_, i): Vector4 => {
@@ -178,15 +172,15 @@ const render = (t = 0) => {
 
   prevPoints = newPoints.map((p, i) => {
     const { x, y, z, w } = p;
-    const prev = prevPoints[i];
+    const prevPoint = prevPoints[i];
 
-    const dx = (x - prev.x) / SMOOTHNESS;
-    const dy = (y - prev.y) / SMOOTHNESS;
-    const dz = (z - prev.z) / SMOOTHNESS;
+    const nx = prevPoint.x + (x - prevPoint.x) / SMOOTHNESS;
+    const ny = prevPoint.y + (y - prevPoint.y) / SMOOTHNESS;
+    const nz = prevPoint.z + (z - prevPoint.z) / SMOOTHNESS;
 
-    const halfDist = new Vector4(x + dx, y + dy, z + dz, w);
+    const partiallyMovedPoint = new Vector4(nx, ny, nz, w);
 
-    return halfDist;
+    return partiallyMovedPoint;
   });
 };
 
