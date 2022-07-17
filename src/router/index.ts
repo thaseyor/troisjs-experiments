@@ -27,6 +27,11 @@ const routes = [
     path: "/5",
     component: () => import("@/pages/River.vue"),
   },
+  {
+    name: "lorenz",
+    path: "/6",
+    component: () => import("@/pages/Lorenz.vue"),
+  },
 ];
 
 export const router = createRouter({
